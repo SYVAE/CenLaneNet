@@ -1,0 +1,156 @@
+def semi_local(prediction,label,debug=False):
+    structure_loss=0
+    grid = 32
+    PX = Variable(torch.zeros(grid, grid),requires_grad=False).float().cuda()
+    PY = Variable(torch.zeros(grid, grid),requires_grad=False).float().cuda()
+    for i in range(0, grid):
+        PX[:, i] = i + 1
+    for i in range(0, grid):
+        PY[i, :] = i + 1
+
+    label=label.float()
+    for batchidx in range(0,label.shape[0]):
+        seglabel=label[batchidx,:,:]
+        segpre=prediction[batchidx,1,:,:].squeeze(0)
+
+        if debug and batchidx==0:
+            color_seg = np.zeros([seglabel.shape[0], seglabel.shape[1], 3])
+            color_seg[:, :, 0] = seglabel.detach().cpu().numpy()
+            color_seg[:, :, 1] = seglabel.detach().cpu().numpy()
+            color_seg[:, :, 2] = seglabel.detach().cpu().numpy()
+            cv2.namedWindow("label", cv2.WINDOW_NORMAL)
+        for i in range(0, seglabel.shape[0]-grid, grid):
+            for j in range(0, seglabel.shape[1]-grid, grid):
+                if debug and batchidx == 0:
+                    cv2.rectangle(color_seg, (j, i), (j + grid, i + grid), color=(255, 0, 0), thickness=3)
+
+                ###gt weightmap
+                map = seglabel[i:i + grid, j:j + grid]
+                mask=map==1
+                posY=PY[mask]
+                a=torch.unique(posY)
+                # map = torch.tensor(map)
+
+                ###pre weightmap
+                premap = segpre[i:i + grid, j:j + grid]
+                # premap = torch.tensor(map)
+
+
+                if map.sum() > 30:
+                    if a.shape[0]>10:
+                        #####1. gt######################
+                        a11 = PY.mul(PY).mul(map).sum()
+                        a12 = PY.mul(map).sum()
+                        a21 = PY.mul(map).sum()
+                        a22 = Variable(torch.ones(PY.shape)).float().cuda().mul(map).sum()
+
+                        b1 = PX.mul(PY).mul(map).sum()
+                        b2 = PX.mul(map).sum()
+
+                        if abs(a11 * a22 - a12 * a21) < 1e-5:
+                            continue
+                        A = Variable(torch.tensor([[a22, -a12], [-a21, a11]]) / (a11 * a22 - a12 * a21)).cuda()
+                        B = torch.tensor([[b1], [b2]]).cuda()
+                        # C = A.inverse().matmul(B)
+                        C = A.matmul(B)
+
+                        gt_C=C
+                        if debug and batchidx == 0:
+                            X = torch.tensor(np.array(range(0, grid))).cuda().float()
+                            Y = C[0] * X + C[1]
+                            Y = torch.clamp(Y, 0, grid)
+                            # cv2.rectangle(color_seg, (j, i), (j + 32, i + 32), color=(0, 0, 255), thickness=-1)
+                            for idx in range(0, grid):
+                                cv2.line(color_seg, (int(Y[idx] + j), X[idx] + i), (int(Y[idx] + j), X[idx] + i),
+                                         color=(0, 0, 255), thickness=3)
+
+                        #####2. pre######################
+                        a11 = PY.mul(PY).mul(premap).sum()
+                        a12 = PY.mul(premap).sum()
+                        a21 = PY.mul(premap).sum()
+                        a22 = Variable(torch.ones(PY.shape)).float().cuda().mul(premap).sum()
+
+                        b1 = PX.mul(PY).mul(premap).sum()
+                        b2 = PX.mul(premap).sum()
+
+                        # A = torch.tensor([[a11, a12], [a21, a22]])
+                        if abs(a11 * a22 - a12 * a21)<1e-5:
+                            continue
+                        A = Variable(torch.tensor([[a22, -a12], [-a21, a11]]) / (a11 * a22 - a12 * a21)).cuda()
+                        B = torch.tensor([[b1], [b2]]).cuda()
+                        # C = A.inverse().matmul(B)
+                        C = A.matmul(B)
+
+
+                        pre_C = C
+                        structure_loss+=(pre_C-gt_C).mul((pre_C-gt_C)).sum()
+                        # structure_loss += abs(pre_C - gt_C).sum()
+                        if debug and batchidx == 0:
+                            X = torch.tensor(np.array(range(0, grid))).cuda().float()
+                            Y = C[0] * X + C[1]
+                            Y = torch.clamp(Y, 0, grid)
+                            # cv2.rectangle(color_seg, (j, i), (j + 32, i + 32), color=(0, 0, 255), thickness=-1)
+                            for idx in range(0, grid):
+                                cv2.line(color_seg, (int(Y[idx] + j), X[idx] + i), (int(Y[idx] + j), X[idx] + i),
+                                         color=(0, 255, 255), thickness=3)
+                if map.sum()==0:
+                    #####1. gt######################
+                    a11 = PY.mul(PY).mul(1-map).sum()
+                    a12 = PY.mul(1-map).sum()
+                    a21 = PY.mul(1-map).sum()
+                    a22 = Variable(torch.ones(PY.shape)).float().cuda().mul(1-map).sum()
+
+                    b1 = PX.mul(PY).mul(1-map).sum()
+                    b2 = PX.mul(1-map).sum()
+
+                    if abs(a11 * a22 - a12 * a21) < 1e-5:
+                        continue
+                    A = Variable(torch.tensor([[a22, -a12], [-a21, a11]]) / (a11 * a22 - a12 * a21)).cuda()
+                    B = torch.tensor([[b1], [b2]]).cuda()
+                    # C = A.inverse().matmul(B)
+                    C = A.matmul(B)
+
+                    gt_C = C
+                    if debug and batchidx == 0:
+                        X = torch.tensor(np.array(range(0, grid))).cuda().float()
+                        Y = C[0] * X + C[1]
+                        Y = torch.clamp(Y, 0, grid)
+                        # cv2.rectangle(color_seg, (j, i), (j + 32, i + 32), color=(0, 0, 255), thickness=-1)
+                        for idx in range(0, grid):
+                            cv2.line(color_seg, (int(Y[idx] + j), X[idx] + i), (int(Y[idx] + j), X[idx] + i),
+                                     color=(0, 0, 255), thickness=3)
+
+                    #####2. pre######################
+                    a11 = PY.mul(PY).mul(1-premap).sum()
+                    a12 = PY.mul(1-premap).sum()
+                    a21 = PY.mul(1-premap).sum()
+                    a22 = Variable(torch.ones(PY.shape)).float().cuda().mul(1-premap).sum()
+
+                    b1 = PX.mul(PY).mul(1-premap).sum()
+                    b2 = PX.mul(1-premap).sum()
+
+                    # A = torch.tensor([[a11, a12], [a21, a22]])
+                    if abs(a11 * a22 - a12 * a21) < 1e-5:
+                        continue
+                    A = Variable(torch.tensor([[a22, -a12], [-a21, a11]]) / (a11 * a22 - a12 * a21)).cuda()
+                    B = torch.tensor([[b1], [b2]]).cuda()
+                    # C = A.inverse().matmul(B)
+                    C = A.matmul(B)
+
+                    pre_C = C
+                    structure_loss += (pre_C - gt_C).mul((pre_C - gt_C)).sum()
+                    # structure_loss += abs(pre_C - gt_C).sum()
+                    if debug and batchidx == 0:
+                        X = torch.tensor(np.array(range(0, grid))).cuda().float()
+                        Y = C[0] * X + C[1]
+                        Y = torch.clamp(Y, 0, grid)
+                        # cv2.rectangle(color_seg, (j, i), (j + 32, i + 32), color=(0, 0, 255), thickness=-1)
+                        for idx in range(0, grid):
+                            cv2.line(color_seg, (int(Y[idx] + j), X[idx] + i), (int(Y[idx] + j), X[idx] + i),
+                                     color=(0, 255, 255), thickness=1)
+
+        if debug and batchidx == 0:
+            cv2.imshow("label", color_seg)
+            cv2.waitKey(1)
+
+    return structure_loss

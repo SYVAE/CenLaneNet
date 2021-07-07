@@ -2,12 +2,12 @@
 
 This is an implementation of  "":
 
-​                                                                                         <img src="/home/sunyi/sy/A3LaneDetection/A_CenLaneNet/culaneRes/151_ins.jpg" style="zoom:33%;" />    <img src="ReadMe.assets/151_res.jpg" style="zoom:33%;" /> 
+​                                                                                         <img src="ReadMe.assets/151_ins.jpg" style="zoom:33%;" />    <img src="ReadMe.assets/151_res.jpg" style="zoom:33%;" /> 
 
 ![](ReadMe.assets/151.jpg)
 
 ### Quick starts:
-
+https://pan.baidu.com/s/1LoE_VAFHQj6JX9gzQtr2_A [code:4DWA]
 1) Evaluating tusimple
 
 ```

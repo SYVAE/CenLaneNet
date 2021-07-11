@@ -7,7 +7,6 @@ from __future__ import division
 from .Backbone import *
 import torch.nn.functional as F
 from Configs import config as cfg
-from mpl_toolkits.axisartist.axislines import SubplotZero
 import numpy as np
 __all__ = ['PostBranch']
 
@@ -30,10 +29,8 @@ class PostBranch(nn.Module):
         # for segmentation
         self.fc3 = C(cfg.Model_cfg.DAhead_outputchannel, 32, 1, 0, 1)
         self.layers6 = C(32, 16, 3, 1, 1)
-        if configs.softmax_flag:
-            self.layers7 = C(16, 2, 1, 0, 1)
-        else:
-            self.weights = nn.Parameter(
+
+        self.weights = nn.Parameter(
                 nn.init.kaiming_normal_(torch.rand(2, 16, 1, 1, requires_grad=True)))
 
         self.s = configs.scale_factor
@@ -60,20 +57,17 @@ class PostBranch(nn.Module):
             #segmentation
             seg_x1 = self.fc3(up)
             seg_x2 = self.layers6(seg_x1)
-            if not self.configs.softmax_flag:
-                cosine = torch.nn.functional.conv2d(F.normalize(seg_x2), F.normalize(self.weights))
-                phi = cosine - self.m
-                # --------------------------- convert label to one-hot ---------------------------
-                one_hot = torch.zeros(cosine.size(), device='cuda')
-                one_hot = one_hot.view(cosine.shape[0], cosine.shape[1], -1)
-                one_hot.scatter_(1, gt.view(gt.shape[0], 1, -1), 1)
 
-                one_hot = one_hot.view(cosine.shape[0], cosine.shape[1], cosine.shape[2], cosine.shape[3])
-                output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
-                output *= self.s
-            else:
-                print('here softmax')
-                output = self.layers7(seg_x2)
+            cosine = torch.nn.functional.conv2d(F.normalize(seg_x2), F.normalize(self.weights))
+            phi = cosine - self.m
+            # --------------------------- convert label to one-hot ---------------------------
+            one_hot = torch.zeros(cosine.size(), device='cuda')
+            one_hot = one_hot.view(cosine.shape[0], cosine.shape[1], -1)
+            one_hot.scatter_(1, gt.view(gt.shape[0], 1, -1), 1)
+
+            one_hot = one_hot.view(cosine.shape[0], cosine.shape[1], cosine.shape[2], cosine.shape[3])
+            output = (one_hot * phi) + ((1.0 - one_hot) * cosine)
+            output *= self.s
         else:
             imsize = cfg.Dataprocess_cfg.gtSize
             # instance
@@ -95,11 +89,9 @@ class PostBranch(nn.Module):
             seg_x1 = self.fc3(up)
             seg_x2 = self.layers6(seg_x1)
 
-            if self.configs.softmax_flag:
-                output = self.layers7(seg_x2)
-            else:
-                cosine = torch.nn.functional.conv2d(F.normalize(seg_x2), F.normalize(self.weights))
-                cosine[0, 1, :, :] = cosine[0, 1, :, :] - self.m
-                output = cosine * self.s
+
+            cosine = torch.nn.functional.conv2d(F.normalize(seg_x2), F.normalize(self.weights))
+            cosine[0, 1, :, :] = cosine[0, 1, :, :] - self.m
+            output = cosine * self.s
             # plt.show()
         return insres, output,cenres

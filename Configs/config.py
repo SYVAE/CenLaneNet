@@ -19,7 +19,6 @@ class Dataprocess_cfg():
      CUlane_im_height=590
 
 class Model_cfg():
-     DualAttention=1
      DAhead_outputchannel=128
      resnet_channel=[64,128,256,512]
      EffcientBlocks = [13, 15, 10, 8, 18]  # b5 13, b6 15 b4 10, b3 8,b7 18

@@ -6,22 +6,7 @@ import torch.nn as nn
 class LaneNet(nn.Module):
     def __init__(self,backbone,config=None):
         super(LaneNet,self).__init__()
-        if backbone=='resnet34' or backbone=='resnet18':
-            if  cfg.Model_cfg.DualAttention==False:
-                self.backbone=Backbone.BaseResNet(backbone=backbone)
-            else:
-                self.backbone=Backbone.BaseResNetDA(backbone=backbone)
-        elif backbone=='ERF':
-            if cfg.Model_cfg.DualAttention == False:
-                self.backbone = Backbone.ERFnet()
-            else:
-                self.backbone = Backbone.ERFnetDA()
-        else:
-            if cfg.Model_cfg.DualAttention==False:
-                 self.backbone = Backbone.BaseEfficientNet(backbone=backbone)
-            else:
-                self.backbone = Backbone.BaseEfficientNetDA(backbone=backbone)
-
+        self.backbone = Backbone.BaseEfficientNetDA(backbone=backbone)
         self.postbranch=PostBranch.PostBranch(config)
 
     def forward(self, x,gt=None,savepath=None,count=None):

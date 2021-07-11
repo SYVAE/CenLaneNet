@@ -14,7 +14,6 @@ class LaneEval(object):
     lr = LinearRegression()
     pixel_thresh = 20
     pt_thresh = 0.85
-    # pt_thresh=0.6
     @staticmethod
     def get_angle(xs, y_samples):
         xs, ys = xs[xs >= 0], y_samples[xs >= 0]
@@ -100,7 +99,3 @@ class LaneEval(object):
 if __name__ == '__main__':
     import sys
     print(LaneEval.bench_one_submit("../test_result.json", "../test_label.json"))
-    # print(LaneEval.bench_one_submit("/home/sunyi/sy/c++/CNNAnlaysis/A2_pythoncode/0clone/PINet-master/test_result.json", "test_label.json"))
-    # print(LaneEval.bench_one_submit("test_result.json", "/home/sunyi/sy/c++/CNNAnlaysis/A2_pythoncode/0clone/PINet-master/test_result.json"))
-    # print(LaneEval.bench_one_submit("/home/sunyi/sy/c++/CNNAnlaysis/A0_sy_LKYlib/B0Project/CosineSimilarity/landetectionwithCosineEmbedding_v7withseg/newjson.json", "test_label.json"))
-

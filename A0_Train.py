@@ -163,7 +163,6 @@ def TraintheNetwork(config):
 if __name__ == '__main__':
     print("here")
     parser=argparse.ArgumentParser()
-    parser.add_argument("--softmax_flag",default=0,type=int)
     parser.add_argument("--max_iter",default=100,type=int)
     parser.add_argument("--batchsize",default=5,type=int)
     parser.add_argument("--Continue",default=1,type=int)
@@ -171,7 +170,7 @@ if __name__ == '__main__':
     parser.add_argument("--savepath",default='./tempmodel/')
 
     parser.add_argument("--scale_factor",default=30)
-    parser.add_argument("--margin",default=0.6,type=float)
+    parser.add_argument("--margin",default=0.4,type=float)
     parser.add_argument("--instance_Margin",default=0,type=float)
     parser.add_argument("--saveinterval",default=10,type=int)
 

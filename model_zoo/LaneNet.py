@@ -22,9 +22,8 @@ if __name__=='__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--softmax_flag", default=0, type=int)
-    parser.add_argument("--scale_factor", default=40)
-    parser.add_argument("--margin", default=0.6, type=float)
+    parser.add_argument("--scale_factor", default=30)
+    parser.add_argument("--margin", default=0.4, type=float)
     config=parser.parse_args()
     net=LaneNet('efficientnet-b6',config)
     net.cuda()

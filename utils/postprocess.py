@@ -22,11 +22,7 @@ def embedding_post_process(embedding, bin_seg, band_width=1.5, max_num_lane=4):
     cluster_list = embedding[bin_seg>0]
     if len(cluster_list)==0:
         return cluster_result
-    # print(len(cluster_list))
-    t=time.time()
-    # mean_shift = MeanShift(bandwidth=band_width, bin_seeding=True, n_jobs=-1,min_bin_freq=100)
-    #
-    # mean_shift.fit(cluster_list)
+
     mean_shift = MeanShift(bandwidth=band_width, bin_seeding=True, min_bin_freq=100).fit(cluster_list)
     labels = mean_shift.labels_
     cluster_result[bin_seg>0] = labels + 1

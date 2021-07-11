@@ -67,27 +67,11 @@ class LaneDataset(Dataset):
 
         tempim = (tempim - cfg.Dataprocess_cfg.dataMean)
 
-        # pos=positionalencoding2d(4, 256, 512)
         input = torch.from_numpy(np.ascontiguousarray(tempim.transpose(2, 0, 1))).float()
-        # input=torch.cat([input,pos],dim=0)
         instancegt = torch.from_numpy(np.ascontiguousarray(tempinstance))
         label = torch.from_numpy(np.ascontiguousarray(tempseg))
         cenlabel = torch.from_numpy(np.ascontiguousarray(tempcen))
 
-        # tempim = cv2.resize(tempim, (tempcen.shape[1], tempcen.shape[0]))
-        # plt.figure("im")
-        # plt.imshow(tempim / 255)
-        #
-        # plt.figure("ins")
-        # plt.imshow(tempim[:, :, 0] / 255 + tempinstance)
-        #
-        # plt.figure("seg")
-        # plt.imshow(tempseg)
-        #
-        # plt.figure("cen")
-        # plt.imshow(tempim[:, :, 0] / 255 + tempcen)
-        # #
-        # plt.show()
         return input,instancegt,label,cenlabel
 
 
@@ -107,7 +91,7 @@ def Gaussian(im):
 
 
 #################################################################################################################
-## Change intensity
+## Change intensity：Key Points Estimation and Point Instance Segmentation Approach for Lane Detection
 #################################################################################################################
 def Change_intensity(im):
 

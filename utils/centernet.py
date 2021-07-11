@@ -17,11 +17,6 @@ def _neg_loss(preds, cengt):
         neg_inds = gt.lt(1)
         pred = preds[i, :, :, :].squeeze()
 
-        # plt.figure("one hot")
-        # plt.imshow(gt.squeeze().detach().cpu().numpy())
-        # plt.pause(0)
-        # print(neg_inds.shape)
-
         neg_weights = torch.pow(1 - gt[neg_inds], 4)
 
         pos_pred = pred[pos_inds]
@@ -116,11 +111,6 @@ def _topk(scores, ins_res, K=20, CosThresh=0.5):
 
     ####Proposal point######
     matrix = np.matmul(topk_feature, topk_feature.transpose())
-
-    # plt.figure("m")
-    # plt.imshow(matrix)
-    # plt.show()
-    # plt.pause(0)
 
     proposal_center = []
     proposal_x = []

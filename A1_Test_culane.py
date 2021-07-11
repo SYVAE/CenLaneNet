@@ -151,7 +151,6 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--softmax_flag", default=0, type=int)
     parser.add_argument("--scale_factor", default=30)
     parser.add_argument("--margin", default=0.57, type=float)
     parser.add_argument("--CosThresh2", default=0.8, type=float)

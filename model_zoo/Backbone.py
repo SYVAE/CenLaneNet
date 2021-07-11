@@ -16,36 +16,19 @@ class BaseEfficientNetDA(nn.Module):
         super(BaseEfficientNetDA, self).__init__()
         # copying modules from pretrained models
         self.pretrained = EfficientNet.from_pretrained(backbone) if pretrained else EfficientNet.from_name(backbone)
-        if backbone=='efficientnet-b5':
-            self.blocknum=cfg.Model_cfg.EffcientBlocks[0]
-            # self.fc = C(cfg.Model_cfg.efficientb5[3], cfg.Model_cfg.DAhead_outputchannel, 1, 0, 1)
-            self.head = DANetHead(cfg.Model_cfg.efficientb5[3], cfg.Model_cfg.DAhead_outputchannel, norm_layer)
-        elif backbone=='efficientnet-b6':
-            self.blocknum=cfg.Model_cfg.EffcientBlocks[1]
-            self.head = DANetHead(cfg.Model_cfg.efficientb6[3], cfg.Model_cfg.DAhead_outputchannel, norm_layer)
-        elif backbone=='efficientnet-b4':
-            self.blocknum=cfg.Model_cfg.EffcientBlocks[2]
-            self.head = DANetHead(cfg.Model_cfg.efficientb4[3], cfg.Model_cfg.DAhead_outputchannel, norm_layer)
-        elif backbone == 'efficientnet-b3':
-            self.blocknum = cfg.Model_cfg.EffcientBlocks[3]
-            self.head = DANetHead(cfg.Model_cfg.efficientb3[3], cfg.Model_cfg.DAhead_outputchannel, norm_layer)
-        elif backbone == 'efficientnet-b7':
-            self.blocknum = cfg.Model_cfg.EffcientBlocks[4]
-            self.head = DANetHead(cfg.Model_cfg.efficientb7[3], cfg.Model_cfg.DAhead_outputchannel, norm_layer)
+        self.blocknum=cfg.Model_cfg.EffcientBlocks[1]
+        self.head = DANetHead(cfg.Model_cfg.efficientb6[3], cfg.Model_cfg.DAhead_outputchannel, norm_layer)
 
     def forward(self, x):
         """ This is modified by Lanenet, 2020/5/12. """
-        # Convolution layers
-        # Stem
         x = self.pretrained._swish(self.pretrained._bn0(self.pretrained._conv_stem(x)))
 
-        # Blocks
         for idx in range(0,self.blocknum):
             drop_connect_rate = self.pretrained._global_params.drop_connect_rate
             if drop_connect_rate:
                 drop_connect_rate *= float(idx) / len(self.pretrained._blocks)
             x = self.pretrained._blocks[idx](x, drop_connect_rate=drop_connect_rate)
-            # print('idx:{0},shape{1}'.format(idx+1,x.shape))
+
 
         # Head
         x = self.head(x)

@@ -43,3 +43,9 @@ python A0_Train.py --GtDataroot "/home/sunyi/sy/data/LaneDetection/tusimple/"
 
 Some parameters are selected from validation datasets...
 (Code for generating the Gt of Culane will come soon....)
+
+
+
+
+
+Please contact me:1171272375@qq.com if you have any questions about this implementation

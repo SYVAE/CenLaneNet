@@ -48,4 +48,13 @@ Some parameters are selected from validation datasets...
 
 
 
-Please contact me:sunyi13@nudt.edu.cn if you have any questions about this implementation
+Please contact me:sunyi13@nudt.edu.cn if you have any questions about this implementation。If you find this project is useful, please cite this work if possible:
+@ARTICLE{9735393,
+  author={Yi, Sun and Li, Jian and Xu, Xin and Shi, Yifei},
+  journal={IEEE Transactions on Intelligent Vehicles}, 
+  title={Adaptive Multi-Lane Detection based on Robust Instance Segmentation for Intelligent Vehicles}, 
+  year={2022},
+  volume={},
+  number={},
+  pages={1-1},
+  doi={10.1109/TIV.2022.3158750}}
